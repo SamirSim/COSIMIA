@@ -135,6 +135,14 @@ if __name__ == "__main__":
 		print(f"Objective values: {label}")
 		print(f"TOPSIS reward: {optimizer._scalarized_yy[-1]}\n")
 
+	# Recommended configuration
+	idx, xbest, topsisbest, obj_best = optimizer.recommended()
+	print("== FINAL RESULTS ==")
+	print(f"Recommended configuration: {xbest}")
+	print(f"Objective values: {obj_best}")
+	print(f"TOPSIS reward: {topsisbest}")
+	print(f"Index: {idx}")
+
 	# Let's plot some metrics
 	alpha = 2.0 / (budget / 4.0 + 1.0)
 	_, axes = plt.subplots(ncols=3)

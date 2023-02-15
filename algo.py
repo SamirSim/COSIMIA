@@ -59,6 +59,16 @@ class BOOptimizer(ABC):
 		"""
 		...
 
+	@abstractmethod
+	def recommended(self):
+		"""Return the recommended configuration among the previously observed ones
+
+		Returns:
+				tuple: metrics regarding the recommended configuration among
+					the previously observed ones
+		"""
+		...
+
 class TOPSISOptimizer(BOOptimizer):
 	"""Multi-objective optimizer maximizing a scalarization equivalent to the
 	TOPSIS scalarization.
@@ -137,3 +147,13 @@ class TOPSISOptimizer(BOOptimizer):
 
 		self.normalize()
 		self.scalarize()
+
+	def recommended(self):
+		"""Return the best configuration among the previously collected ones
+
+		Returns:
+				tuple: metrics regarding the best configuration : its index, itself,
+					its TOPSIS value, its objective values
+		"""
+		amax = np.argmax(self._scalarized_yy)
+		return amax, self._xx[amax], self._scalarized_yy[amax], self._yy[amax]

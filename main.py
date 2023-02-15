@@ -14,6 +14,7 @@ battery_capacity = 2300
 battery_voltage = 3
 PRICE_GW = 100
 budget = 100
+filepath = "BO_results.tsv"
 
 def dummy_objective_function(x):
 	return np.array([np.linalg.norm(x - 0.5) ** 2, np.cos(np.linalg.norm(x))])
@@ -134,6 +135,9 @@ if __name__ == "__main__":
 		print(f"Queried: {query}")
 		print(f"Objective values: {label}")
 		print(f"TOPSIS reward: {optimizer._scalarized_yy[-1]}\n")
+
+	print("== Saving the results... ==\n")
+	optimizer.save(filepath)
 
 	# Recommended configuration
 	idx, xbest, topsisbest, obj_best = optimizer.recommended()

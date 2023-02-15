@@ -68,6 +68,15 @@ class BOOptimizer(ABC):
 					the previously observed ones
 		"""
 		...
+	
+	@abstractmethod
+	def save(self, path):
+		"""Save the configurations and the objective values / scalarization into a
+		tsv file.
+
+		Args:
+				path (str): filepath
+		"""
 
 class TOPSISOptimizer(BOOptimizer):
 	"""Multi-objective optimizer maximizing a scalarization equivalent to the
@@ -157,3 +166,15 @@ class TOPSISOptimizer(BOOptimizer):
 		"""
 		amax = np.argmax(self._scalarized_yy)
 		return amax, self._xx[amax], self._scalarized_yy[amax], self._yy[amax]
+
+	def save(self, filepath):
+		"""Save the configurations and the objective values / scalarization into a
+		tsv file.
+
+		Args:
+				path (str): filepath
+		"""
+		file = open(filepath, 'w+')
+		file.write("x\ty\ttopsis\n")
+		for i in range(len(self._xx)):
+			file.write(f"{list(self._xx[i])}\t{list(self._yy[i])}\t{self._scalarized_yy[i]}\n")

@@ -9,7 +9,7 @@ jitter = 1e-5
 def listify(np2darray):
 	return [list(l) for l in np2darray]
 
-def topsis(y):
+def topsis(y, mins, maxs):
 	"""TOPSIS scalarization for the multi-objective problem.
 
 	Assumptions:
@@ -22,7 +22,8 @@ def topsis(y):
 	Returns:
 			float: a single objective value, lower is better
 	"""
-	return 1 + (y.shape[0] - 2 * np.linalg.norm(y, ord=1)) / (np.linalg.norm(y) ** 2 + jitter)
+	norm_mins = np.linalg.norm(y - mins)
+	return norm_mins / (norm_mins + np.linalg.norm(maxs - y))
 
 class BOOptimizer(ABC):
 	"""Abstract BO Optimization class. Describe the interface for a BO algorithm.
@@ -88,17 +89,16 @@ class TOPSISOptimizer(BOOptimizer):
 		self.scalarize()
 
 	def normalize(self):
-		"""Max-min normalization of the objective values in the _yy attribute
+		"""L2 normalization of the objective values in the _yy attribute
 
 		Returns:
 				np.array: the objective values normalized
 		"""
-		self._mins = np.min(self._yy, axis=0)
-		self._maxs = np.max(self._yy, axis=0)
+		normalization_weights = np.array([1.0 / np.linalg.norm(self._yy[:, i]) for i in range(self._yy.shape[1])])
 
-		self._normalized_yy = (self._yy - self._mins) / (self._maxs - self._mins)
+		self._normalized_yy = np.multiply(self._yy, normalization_weights)
 
-		return self._mins, self._maxs, self._normalized_yy
+		return self._normalized_yy
 
 	def scalarize(self):
 		"""Scalarize the normalized objective values in the _yy_normalized
@@ -107,7 +107,9 @@ class TOPSISOptimizer(BOOptimizer):
 		Returns:
 				np.array: the objective values scalarized with TOPSIS
 		"""
-		self._scalarized_yy = np.array([topsis(y) for y in self._normalized_yy])
+		mins = np.min(self._normalized_yy, axis=0)
+		maxs = np.max(self._normalized_yy, axis=0)
+		self._scalarized_yy = np.array([topsis(y, mins, maxs) for y in self._normalized_yy])
 		return self._scalarized_yy
 
 	def ask(self):
@@ -120,7 +122,7 @@ class TOPSISOptimizer(BOOptimizer):
 		self._kernel = kernels.ConstantKernel() * kernels.Matern(nu=self._nu) + kernels.WhiteKernel()
 		self._optimizer = Optimizer(self._in_dimensions, base_estimator=GaussianProcessRegressor(self._kernel, n_restarts_optimizer=15), acq_func="LCB", acq_optimizer="lbfgs", n_initial_points=2)
 		
-		self._optimizer.tell(listify(self._xx), list(self._scalarized_yy))
+		self._optimizer.tell(listify(self._xx), list(-self._scalarized_yy))
 		return np.array(self._optimizer.ask())
 
 	def tell(self, x, y):

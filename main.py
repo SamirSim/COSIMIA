@@ -85,15 +85,22 @@ def exponential_moving_average(yy, alpha):
 
 if __name__ == "__main__":
 	# TODO: replace by the true domains
+	# in_dimensions = [
+	# 	(0.0, 1.0),
+	# 	(-1.0, 1.0)
+	# ]
+
+	rounding = True
 	in_dimensions = [
-		(1.0, nED//5),
-		(0.0, 7.0),
-		(0.0, 5.0),
-		(3.0, 8.0),
-		(0.0, 7.0)
+		(1, nED//5),
+		(0, 7),
+		(0, 5),
+		(3, 8),
+		(0, 7)
 	]
 
 	# TODO: replace by the true objective function
+	# objective = dummy_objective_function
 	objective = simulation
 
 	# Dummy collection of observations
@@ -114,9 +121,11 @@ if __name__ == "__main__":
 	budget = 60
 	for i in range(n_initial_obs + 1, budget + 1):
 		query = optimizer.ask()
+
 		# Round
-		for j,elem in enumerate(query):
-			query[j] = round(elem)
+		if rounding:
+			for j,elem in enumerate(query):
+				query[j] = round(elem)
 		label = objective(query)
 
 		optimizer.tell(query, label)

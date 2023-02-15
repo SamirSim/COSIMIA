@@ -13,6 +13,7 @@ nED, period, size, distance, environment = 50, 1, 100, 200, "suburban"
 battery_capacity = 2300
 battery_voltage = 3
 PRICE_GW = 100
+budget = 100
 
 def dummy_objective_function(x):
 	return np.array([np.linalg.norm(x - 0.5) ** 2, np.cos(np.linalg.norm(x))])
@@ -92,11 +93,11 @@ if __name__ == "__main__":
 
 	rounding = True
 	in_dimensions = [
-		(1, nED//5),
-		(0, 7),
-		(0, 5),
-		(3, 8),
-		(0, 7)
+		(1.0, nED//5),
+		(0.0, 7.0),
+		(0.0, 5.0),
+		(3.0, 8.0),
+		(0.0, 7.0)
 	]
 
 	# TODO: replace by the true objective function
@@ -118,7 +119,6 @@ if __name__ == "__main__":
 	optimizer = TOPSISOptimizer(in_dimensions, obs)
 
 	# Optimization loop
-	budget = 60
 	for i in range(n_initial_obs + 1, budget + 1):
 		query = optimizer.ask()
 

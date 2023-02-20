@@ -119,6 +119,11 @@ if __name__ == "__main__":
 	# Initialize the model
 	n_initial_obs = len(obs)
 	optimizer = TOPSISOptimizer(in_dimensions, obs)
+	# coeffs_dimensions = [
+	# 	(0.5, 0.8),
+	# 	(0.1, 0.3)
+	# ]
+	# optimizer = RandomConvexCombinationsOptimizer(in_dimensions, coeffs_dimensions, obs)
 
 	# Optimization loop
 	start = time.time()
@@ -136,29 +141,29 @@ if __name__ == "__main__":
 		print(f"== STEP {i} ==")
 		print(f"Queried: {query}")
 		print(f"Objective values: {label}")
-		print(f"TOPSIS reward: {optimizer._scalarized_yy[-1]}\n")
+		print(f"Scalarized reward: {optimizer._scalarized_yy[-1]}\n")
 
 	print("== Saving the results... ==\n")
 	optimizer.save(filepath)
 
 	# Recommended configuration
-	idx, xbest, topsisbest, obj_best = optimizer.recommended()
-	print("== FINAL RESULTS ==")
-	print(f"Recommended configuration: {xbest}")
-	print(f"Objective values: {obj_best}")
-	print(f"TOPSIS reward: {topsisbest}")
-	print(f"Index: {idx}")
-	print(f"Execution time: {time.time()-start} seconds")
+	# idx, xbest, topsisbest, obj_best = optimizer.recommended()
+	# print("== FINAL RESULTS ==")
+	# print(f"Recommended configuration: {xbest}")
+	# print(f"Objective values: {obj_best}")
+	# print(f"TOPSIS reward: {topsisbest}")
+	# print(f"Index: {idx}")
+	# print(f"Execution time: {time.time()-start} seconds")
 
 	# Let's plot some metrics
 	alpha = 2.0 / (budget / 4.0 + 1.0)
 	_, axes = plt.subplots(ncols=2)
-	"""
-	axes[0].scatter(optimizer._yy[:, 0], optimizer._yy[:, 1], c=viridis(np.arange(1, budget + 1) / budget))
-	axes[0].set_xlabel("First objective")
-	axes[0].set_ylabel("Second objective")
-	axes[0].set_title("Optimization in output space")
-	"""
+	
+	# axes[0].scatter(optimizer._yy[:, 0], optimizer._yy[:, 1], c=viridis(np.arange(1, budget + 1) / budget))
+	# axes[0].set_xlabel("First objective")
+	# axes[0].set_ylabel("Second objective")
+	# axes[0].set_title("Optimization in output space")
+	
 
 	axes[0].scatter(range(1, budget+1), optimizer._scalarized_yy, c=viridis(np.arange(1, budget + 1) / budget))
 	axes[0].plot(range(1, budget+1), exponential_moving_average(optimizer._scalarized_yy, alpha), alpha=0.3)

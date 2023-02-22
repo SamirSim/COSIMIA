@@ -14,7 +14,7 @@ nED, period, size, distance, environment = 50, 1, 100, 200, "suburban"
 battery_capacity = 2300
 battery_voltage = 3
 PRICE_GW = 100
-budget = 170
+budget = 200
 filepath = "BO_results_pareto.tsv"
 
 def dummy_objective_function(x):
@@ -121,10 +121,10 @@ if __name__ == "__main__":
 	n_initial_obs = len(obs)
 	# optimizer = TOPSISOptimizer(in_dimensions, obs)
 	coeffs_dimensions = [
-	 	(0.5, 0.8),
-		 (0.5, 0.8),
-	 	(0.1, 0.3),
-		 (0.2,0.6)
+	 	(0.7, 0.8),
+		 (0.7, 0.8),
+	 	(0.0, 0.0),
+		 (0.2,0.3)
 	 ]
 	optimizer = RandomConvexCombinationsOptimizer(in_dimensions, coeffs_dimensions, obs)
 
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 	fig = plt.figure()
 	axes = [fig.add_subplot(1, 3, 1, projection='3d'), fig.add_subplot(1, 3, 2), fig.add_subplot(1, 3, 3)]
 	
-	axes[0].scatter(optimizer._yy[:, 0], optimizer._yy[:, 1], optimizer._yy[:, 2], c=viridis(np.arange(1, budget + 1) / budget))
+	axes[0].scatter(optimizer._normalized_yy[:, 0], optimizer._normalized_yy[:, 1], optimizer._normalized_yy[:, 3], c=viridis(np.arange(1, budget + 1) / budget))
 	axes[0].set_xlabel("First objective")
 	axes[0].set_ylabel("Second objective")
 	axes[0].set_zlabel("Third objective")

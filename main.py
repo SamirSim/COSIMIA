@@ -5,6 +5,7 @@ from matplotlib.cm import viridis
 import os
 import subprocess
 import time
+import csv
 
 matplotlib.use('TkAgg',force=True)
 from algo import TOPSISOptimizer, RandomConvexCombinationsOptimizer
@@ -86,6 +87,56 @@ def exponential_moving_average(yy, alpha):
 
 	return ema
 
+def visualize(xx, yy, yy_scalarized=[], objective_indices=range(3)):
+	# Let's plot some metrics
+	alpha = 2.0 / (budget / 4.0 + 1.0)
+	fig = plt.figure()
+	show_yy_scalarized = len(yy_scalarized) > 0
+
+	n_subplots = 2 + int(show_yy_scalarized)
+	axes = [fig.add_subplot(1, n_subplots, 1, projection='3d'), fig.add_subplot(1, n_subplots, 2)]
+	if show_yy_scalarized:
+		axes.append(fig.add_subplot(1, n_subplots, 3))
+	
+	axes[0].scatter(yy[:, objective_indices[0]], yy[:, objective_indices[1]], yy[:, objective_indices[2]], c=viridis(np.arange(1, budget + 1) / budget))
+	axes[0].set_xlabel("First objective")
+	axes[0].set_ylabel("Second objective")
+	axes[0].set_zlabel("Third objective")
+	axes[0].set_title("Optimization in output space")
+
+	distances = [np.linalg.norm(x1 - x2) for x1, x2 in zip(xx[1:], xx)]
+	axes[1].scatter(range(2, budget+1), distances, c=viridis(np.arange(2, budget + 1) / budget))
+	axes[1].plot(range(2, budget+1), exponential_moving_average(distances, alpha), alpha=0.3)
+	axes[1].set_xlabel("Optimization step")
+	axes[1].set_ylabel("Convergence $||x_{t+1} - x_{t}||_2$")
+	axes[1].set_title("Convergence w.r.t optimization step")
+
+	if show_yy_scalarized:
+		axes[2].scatter(range(1, budget+1), yy_scalarized, c=viridis(np.arange(1, budget + 1) / budget))
+		axes[2].plot(range(1, budget+1), exponential_moving_average(yy_scalarized, alpha), alpha=0.3)
+		axes[2].set_xlabel("Optimization step")
+		axes[2].set_ylabel("TOPSIS objective")
+		axes[2].set_title("TOPSIS objective w.r.t optimization step")
+	
+	plt.show()
+
+def read_datafile(filepath):
+	xx, yy, yy_scalarized = [], [], []
+	with open(filepath) as fd:
+		rd = csv.reader(fd, delimiter="\t")
+		first = True
+		for row in rd:
+			if first:
+				first = False
+				continue
+
+			xx.append(eval(row[0]))
+			yy.append(eval(row[1]))
+			if len(row) > 2:
+				yy_scalarized.append(eval(row[2]))
+
+	return np.array(xx), np.array(yy), np.array(yy_scalarized)
+
 if __name__ == "__main__":
 	# TODO: replace by the true domains
 	# in_dimensions = [
@@ -93,6 +144,10 @@ if __name__ == "__main__":
 	# 	(-1.0, 1.0),
 	# 	(0.0, 1.0)
 	# ]
+
+	# Reading the previous datafile
+	xx, yy, yy_scalarized = read_datafile(filepath)
+	visualize(xx, yy, yy_scalarized, objective_indices=[0, 1, 3])
 
 	rounding = True
 	in_dimensions = [
@@ -158,29 +213,4 @@ if __name__ == "__main__":
 	# print(f"Index: {idx}")
 	# print(f"Execution time: {time.time()-start} seconds")
 
-	# Let's plot some metrics
-	alpha = 2.0 / (budget / 4.0 + 1.0)
-	fig = plt.figure()
-	axes = [fig.add_subplot(1, 3, 1, projection='3d'), fig.add_subplot(1, 3, 2), fig.add_subplot(1, 3, 3)]
-	
-	axes[0].scatter(optimizer._normalized_yy[:, 0], optimizer._normalized_yy[:, 1], optimizer._normalized_yy[:, 3], c=viridis(np.arange(1, budget + 1) / budget))
-	axes[0].set_xlabel("First objective")
-	axes[0].set_ylabel("Second objective")
-	axes[0].set_zlabel("Third objective")
-	axes[0].set_title("Optimization in output space")
-
-	axes[1].scatter(range(1, budget+1), optimizer._scalarized_yy, c=viridis(np.arange(1, budget + 1) / budget))
-	axes[1].plot(range(1, budget+1), exponential_moving_average(optimizer._scalarized_yy, alpha), alpha=0.3)
-	axes[1].set_xlabel("Optimization step")
-	axes[1].set_ylabel("TOPSIS objective")
-	axes[1].set_title("TOPSIS objective w.r.t optimization step")
-
-	queries = optimizer._xx
-	distances = [np.linalg.norm(x1 - x2) for x1, x2 in zip(queries[1:], queries)]
-	axes[2].scatter(range(2, budget+1), distances, c=viridis(np.arange(2, budget + 1) / budget))
-	axes[2].plot(range(2, budget+1), exponential_moving_average(distances, alpha), alpha=0.3)
-	axes[2].set_xlabel("Optimization step")
-	axes[2].set_ylabel("Convergence $||x_{t+1} - x_{t}||_2$")
-	axes[2].set_title("Convergence w.r.t optimization step")
-	
-	plt.show()
+	visualize(optimizer._xx, optimizer._yy, optimizer._scalarized_yy, objective_indices=[0, 1, 3])

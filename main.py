@@ -7,7 +7,7 @@ import subprocess
 import time
 
 matplotlib.use('TkAgg',force=True)
-from algo import TOPSISOptimizer
+from algo import TOPSISOptimizer, RandomConvexCombinationsOptimizer
 
 # Global variables
 nED, period, size, distance, environment = 50, 1, 100, 200, "suburban"
@@ -15,7 +15,7 @@ battery_capacity = 2300
 battery_voltage = 3
 PRICE_GW = 100
 budget = 170
-filepath = "BO_results.tsv"
+filepath = "BO_results_pareto.tsv"
 
 def dummy_objective_function(x):
 	return np.array([np.linalg.norm(x - 0.5) ** 2, np.cos(np.linalg.norm(x))])
@@ -118,12 +118,14 @@ if __name__ == "__main__":
 
 	# Initialize the model
 	n_initial_obs = len(obs)
-	optimizer = TOPSISOptimizer(in_dimensions, obs)
-	# coeffs_dimensions = [
-	# 	(0.5, 0.8),
-	# 	(0.1, 0.3)
-	# ]
-	# optimizer = RandomConvexCombinationsOptimizer(in_dimensions, coeffs_dimensions, obs)
+	#optimizer = TOPSISOptimizer(in_dimensions, obs)
+	coeffs_dimensions = [
+	 	(0.5, 0.8),
+		 (0.5, 0.8),
+	 	(0.1, 0.3),
+		 (0.2,0.6)
+	 ]
+	optimizer = RandomConvexCombinationsOptimizer(in_dimensions, coeffs_dimensions, obs)
 
 	# Optimization loop
 	start = time.time()

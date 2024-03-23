@@ -2,7 +2,7 @@
 This code corresponds to the two contributions described in the following preprint paper (please cite this in case you use the code):
 
 ```
-@article{si2023hints,
+@article{si2024ns-ndt,
   title={NS+NDT: Smart Integration of Network Simulation in Network Digital Twin, Application to IoT Networks},
   author={Si-Mohammed, Samir and Bardou, Anthony and Begin, Thomas and Lassous, Isabelle Gu{\'e}rin and Vicat-Blanc, Pascale},
   journal={Future Generation Computer Systems},

@@ -28,6 +28,7 @@
 #include <iterator>
 #include <sstream>
 #include <vector>
+#include <limits> // TODO added this here
 
 /**
  * \file
